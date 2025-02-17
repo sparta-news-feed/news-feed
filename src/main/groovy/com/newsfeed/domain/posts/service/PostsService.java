@@ -104,6 +104,6 @@ public class PostsService {
         //if (!userId.equals(posts.getUser().getId())) {
         //            throw new IllegalArgumentException("본인이 작성한 스케줄만 삭제할 수 있습니다.");
         //        }
-        postsRepository.delete(posts); // 이걸 어떻게....null로 바꾸죠...?
+        postsRepository.delete(posts);
     }
 }

@@ -1,5 +1,6 @@
 package com.newsfeed.domain.posts.controller;
 
+import com.newsfeed.common.Const;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
@@ -14,27 +15,27 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping(Const.ROOT_API_PATH + "/posts")
 public class PostsController {
 
     private final PostsService postsService;
 
-    @PostMapping("/posts")
+    @PostMapping
     public ResponseEntity<PostsCreateResponseDto> create(@RequestBody PostsCreateRequestDto dto) {
         return ResponseEntity.ok(postsService.create(dto));
     }
 
-    @GetMapping("/posts")
+    @GetMapping
     public ResponseEntity<List<PostsResponseDto>> findAll() {
         return ResponseEntity.ok(postsService.findAll());
     }
 
-    @GetMapping("/posts/{postId}")
+    @GetMapping("/{postId}")
     public ResponseEntity<PostsResponseDto> findOne(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(postsService.findOne(postId));
     }
 
-    @PutMapping("/posts/{postId}")
+    @PutMapping("/{postId}")
     public ResponseEntity<PostsUpdateResponseDto> update(
             //@SessionAttribute(name = Const.LOGIN_USER) Long userId,
             @PathVariable("postId") Long postId,
@@ -43,7 +44,7 @@ public class PostsController {
         return  ResponseEntity.ok(postsService.update(postId, dto));
     }
 
-    @DeleteMapping("/posts/{postId}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<Void> delete(
             //@SessionAttribute(name = Const.LOGIN_USER) Long userId,
             @PathVariable("postId") Long postId
