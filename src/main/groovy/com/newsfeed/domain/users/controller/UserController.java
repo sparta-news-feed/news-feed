@@ -7,6 +7,7 @@ import com.newsfeed.domain.users.dto.request.UserPasswordUpdateRequestDto;
 import com.newsfeed.domain.users.dto.request.UserSignUpRequestDto;
 import com.newsfeed.domain.users.dto.response.UserProfileResponseDto;
 import com.newsfeed.domain.users.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class UserController {
 
     // 유저 회원 가입
     @PostMapping
-    public ResponseEntity<UserProfileResponseDto> signUp(@RequestBody UserSignUpRequestDto requestDto) {
+    public ResponseEntity<UserProfileResponseDto> signUp(@Valid @RequestBody UserSignUpRequestDto requestDto) {
         UserProfileResponseDto response = userService.signUp(
                 requestDto.getEmail(),
                 requestDto.getPassword(),
