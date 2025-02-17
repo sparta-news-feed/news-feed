@@ -8,10 +8,9 @@ import com.newsfeed.domain.posts.dto.response.PostsResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsUpdateResponseDto;
 import com.newsfeed.domain.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,8 +25,12 @@ public class PostsController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostsResponseDto>> findAll() {
-        return ResponseEntity.ok(postsService.findAll());
+    public ResponseEntity<Page<PostsResponseDto>> findAll(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        Page<PostsResponseDto> responseDto = postsService.findAll(page, size);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/{postId}")

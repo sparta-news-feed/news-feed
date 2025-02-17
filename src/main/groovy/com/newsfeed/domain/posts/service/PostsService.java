@@ -10,6 +10,9 @@ import com.newsfeed.domain.posts.entity.Posts;
 import com.newsfeed.domain.posts.repository.PostsRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,24 +44,17 @@ public class PostsService {
         );
     }
     @Transactional(readOnly = true)
-    public List<PostsResponseDto> findAll() {
-
-        postsRepository.findAll();
-
-        List<Posts> postsList = postsRepository.findAll();
-
-        List<PostsResponseDto> dtos = new ArrayList<>();
-
-        for (Posts post : postsList) {
-            dtos.add(new PostsResponseDto(
-                    post.getPostId(),
-                    post.getTitle(),
-                    post.getContents(),
-                    post.getCreatedAt(),
-                    post.getModifiedAt()
-            ));
-        }
-        return dtos;
+    public Page<PostsResponseDto> findAll(int page, int size) {
+        int adjustedPage = (page > 0) ? page - 1 : 0;
+        PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("createdAt").descending());
+        Page<Posts> postsPage = postsRepository.findAll(pageable);
+        return postsPage.map(posts -> new PostsResponseDto(
+                posts.getPostId(),
+                posts.getTitle(),
+                posts.getContents(),
+                posts.getCreatedAt(),
+                posts.getModifiedAt()
+        ));
     }
 
     @Transactional(readOnly = true)
