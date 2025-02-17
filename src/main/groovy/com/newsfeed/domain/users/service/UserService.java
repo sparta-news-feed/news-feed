@@ -63,7 +63,8 @@ public class UserService {
         //JWT에서 내 로그인 정보 가져오기
 
         // 이메일을 이용해 유저 조회
-        User findUser = userRepository.findByEmail(email);
+//        User findUser = userRepository.findByEmail(email);
+        User findUser = new User();
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(oldPassword, findUser.getPassword())) {
