@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    // 회원 가입
+    // 유저 회원 가입
     @PostMapping
     public ResponseEntity<UserProfileResponseDto> signUp(@RequestBody UserSignUpRequestDto requestDto) {
         UserProfileResponseDto response = userService.signUp(
@@ -44,12 +44,12 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // 회원 탈퇴
+    // 유저 회원 탈퇴
     @DeleteMapping
     public ResponseEntity<MessageResponse> deleteUser(
             @RequestHeader Long userId,
             @RequestBody UserDeleteRequestDto requestDto
-            ) {
+    ) {
         MessageResponse response = userService.deleteUser(userId, requestDto.getPassword());
         return ResponseEntity.ok(response);
     }

@@ -63,16 +63,16 @@ public class UserService {
         //JWT에서 내 로그인 정보 가져오기
 
         // 이메일을 이용해 유저 조회
-//    User findUser = userRepository.findByEmail(email);
-//
-//    // 비밀번호 검증
-//    if (!passwordEncoder.matches(oldPassword, findUser.getPassword())) {
-//      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
-//    }
-//
-//    // 새 비밀번호 암호화해서 저장
-//    findUser.updatePassword(passwordEncoder.encode(newPassword));
-//    userRepository.save(findUser);
+        User findUser = userRepository.findByEmail(email);
+
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(oldPassword, findUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호 암호화해서 저장
+        findUser.updatePassword(passwordEncoder.encode(newPassword));
+        userRepository.save(findUser);
 
     }
 
