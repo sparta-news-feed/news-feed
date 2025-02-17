@@ -1,18 +1,22 @@
 package com.newsfeed.domain.users.service;
 
+import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.config.PasswordEncoder;
+import com.newsfeed.domain.followers.entity.Follower;
 import com.newsfeed.domain.followers.repository.FollowerRepository;
 import com.newsfeed.domain.users.dto.response.UserFollowingsProfileResponseDto;
 import com.newsfeed.domain.users.dto.response.UserProfileResponseDto;
 import com.newsfeed.domain.users.entity.User;
 import com.newsfeed.domain.users.repository.UserRepository;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,58 +25,120 @@ public class UserService {
   private final FollowerRepository followerRepository;
   private final PasswordEncoder passwordEncoder;
 
-
-  // 유저 단건 조회
-  public UserProfileResponseDto findById(Long id) {
-    //JWT에서 현재 로그인한 유저 정보 가져오기(
-
-    Long loggedInUserId = null;
-
-    // 조회하려는 유저 찾기
-    Optional<User> optionalUser = userRepository.findById(id);
-    if (optionalUser.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist id = " + id);
+  @Transactional
+  public UserProfileResponseDto signUp(String email, String password, String username, String address) {
+    if (existsByEmail(email)) {
+      throw new ApplicationException("이미 사용중인 이메일입니다.", HttpStatus.CONFLICT);
     }
-    User findUser = optionalUser.get();
 
+    User user = new User(email, passwordEncoder.encode(password), username, address);
+    userRepository.save(user);
+    return new UserProfileResponseDto(user, 0L, 0L);
+  }
 
-    // 팔로워 & 팔로우 수 조회
+  // 유저 로그인
+  public UserProfileResponseDto login(String email, String password) {
+    User findUser = findByEmailOrThrow(email);
+    if (!passwordEncoder.matches(password, findUser.getPassword())) {
+      throw new ApplicationException("비밀번호가 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
+    }
+    return new UserProfileResponseDto(findUser, 0L, 0L);
+  }
+
+  // 유저 단건 조회 (JWT 기반 비교)
+  public UserProfileResponseDto findById(Long userId, Long targetUserId) {
+    User findUser = findUserById(targetUserId);
+    // 팔로워와 팔로잉수 가져오기
     Long followerCount = followerRepository.countByFollower(findUser);
     Long followingCount = followerRepository.countByFollowing(findUser);
-
-    // 만약 로그인한 유저와 조회하려는 유저가 같으면 주소 포함 반환
-    if (loggedInUserId != null && loggedInUserId.equals(id)) {
-      return new UserProfileResponseDto(findUser, followerCount, followingCount);
+    // 로그인한 아이디와 조회 아이디가 같을 경우 모두 출력
+    if(userId.equals(targetUserId)) {
+      return new UserProfileResponseDto(
+          findUser.getId(),
+          findUser.getEmail(),
+          findUser.getUsername(),
+          findUser.getAddress(),
+          followerCount,
+          followingCount,
+          findUser.getCreatedAt(),
+          findUser.getModifiedAt()
+      );
     }
 
-    // 로그인한 유저와 조회하려는 유저가 다르면 주소 널 처리
+    // 로그인한 유저와 다를 경우 주소만 null 처리
     return new UserProfileResponseDto(
-        new User(findUser.getEmail(), findUser.getPassword(), findUser.getUsername(), null),
+        findUser.getId(),
+        findUser.getEmail(),
+        findUser.getUsername(),
+        null,  // 주소만 `null` 처리
         followerCount,
-        followingCount
+        followingCount,
+        findUser.getCreatedAt(),
+        findUser.getModifiedAt()
     );
-
   }
 
   // 유저 비밀번호 수정
-  public void updatePassword(String oldPassword, String newPassword) {
-    //JWT에서 내 로그인 정보 가져오기
-    Long  loggedInUserId = null;
-
-    Optional<User> optionalUser = userRepository.findById(loggedInUserId);
-    if (optionalUser.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.");
-    }
-    User findUser = optionalUser.get();
-    // 비밀번호 검증
+  public void updatePassword(Long userId, String oldPassword, String newPassword) {
+    User findUser = findUserById(userId);
     if (!passwordEncoder.matches(oldPassword, findUser.getPassword())) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
     }
 
-    // 새 비밀번호 암호화해서 저장
     findUser.updatePassword(passwordEncoder.encode(newPassword));
     userRepository.save(findUser);
-
   }
 
+  @Transactional
+  public void deleteUser(Long userId, String password) {
+    User findUser = findUserById(userId);
+    if (findUser.getDeletedAt() != null) {
+      throw new ApplicationException("이미 탈퇴한 사용자입니다.", HttpStatus.BAD_REQUEST);
+    }
+
+    if (!passwordEncoder.matches(password, findUser.getPassword())) {
+      throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
+    }
+
+    findUser.deleteUser();
+  }
+
+  // 유저의 팔로잉 목록 조회
+  public List<UserFollowingsProfileResponseDto> getFollowingList(Long userId) {
+    User findUser = findUserById(userId);
+    List<Follower> followings = followerRepository.findByFollower(findUser);
+    List<UserFollowingsProfileResponseDto> followingDtos = new ArrayList<>();
+    for (Follower following : followings) {
+      followingDtos.add(new UserFollowingsProfileResponseDto(following.getFollowing()));
+    }
+    return followingDtos;
+  }
+
+  // 유저의 팔로워 목록 조회
+  public List<UserProfileResponseDto> getFollowerList(Long userId) {
+    User findUser = findUserById(userId);
+    List<Follower> followers = followerRepository.findByFollowing(findUser);
+    List<UserProfileResponseDto> followerDtos = new ArrayList<>();
+    for (Follower follower : followers) {
+      followerDtos.add(new UserProfileResponseDto(follower.getFollower(), 0L, 0L));
+    }
+    return followerDtos;
+  }
+
+  // 해당 이메일을 가진 유저가 있는지 조회
+  public boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
+  }
+
+  // Service 레벨에서 NULL 체크 (유저 ID)
+  private User findUserById(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new ApplicationException("해당 아이디와 일치하는 유저가 없습니다. id = " + userId, HttpStatus.NOT_FOUND));
+  }
+
+  // Service 레벨에서 NULL 체크 (유저 이메일)
+  private User findByEmailOrThrow(String email) {
+    return userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApplicationException("해당 이메일과 일치하는 유저가 없습니다. email = " + email, HttpStatus.UNAUTHORIZED));
+  }
 }

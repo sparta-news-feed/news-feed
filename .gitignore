@@ -7,6 +7,7 @@ build/
 
 # 모든 환경 설정 파일 무시
 src/main/resources/application.properties
+src/main/groovy/com/newsfeed/common/IgnoreConst.java
 
 ### STS ###
 .apt_generated
