@@ -1,19 +1,21 @@
 package com.newsfeed.domain.users.dto.response;
 import com.newsfeed.domain.users.entity.User;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@RequiredArgsConstructor
 public class UserProfileResponseDto {
-  private Long id;
-  private String email;
-  private String username;
-  private String address;
-  private Long followerCount;
-  private Long followingCount;
-  private LocalDateTime createdAt;
-  private LocalDateTime modifiedAt;
+  private final Long id;
+  private final String email;
+  private final String username;
+  private final String address;
+  private final Long followerCount;
+  private final Long followingCount;
+  private final LocalDateTime createdAt;
+  private final LocalDateTime modifiedAt;
 
   public UserProfileResponseDto(User user, Long followerCount, Long followingCount) {
     this.id = user.getId();
