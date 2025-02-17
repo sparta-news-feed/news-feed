@@ -30,14 +30,14 @@ public class PostsController {
     }
 
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<PostsResponseDto> findOne(@PathVariable Long postId) {
+    public ResponseEntity<PostsResponseDto> findOne(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(postsService.findOne(postId));
     }
 
     @PutMapping("/posts/{postId}")
     public ResponseEntity<PostsUpdateResponseDto> update(
             //@SessionAttribute(name = Const.LOGIN_USER) Long userId,
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             @RequestBody PostsUpdateRequestDto dto
     ) {
         return  ResponseEntity.ok(postsService.update(postId, dto));
@@ -46,7 +46,7 @@ public class PostsController {
     @DeleteMapping("/posts/{postId}")
     public ResponseEntity<Void> delete(
             //@SessionAttribute(name = Const.LOGIN_USER) Long userId,
-            @PathVariable Long postId
+            @PathVariable("postId") Long postId
     ) {
         postsService.deleteById(postId); //+id
         return ResponseEntity.ok().build();
