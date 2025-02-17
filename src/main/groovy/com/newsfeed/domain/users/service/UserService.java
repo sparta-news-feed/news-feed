@@ -60,6 +60,8 @@ public class UserService {
     // 새 비밀번호 암호화해서 저장
     findUser.updatePassword(passwordEncoder.encode(newPassword));
     userRepository.save(findUser);
+
+
   }
 
 

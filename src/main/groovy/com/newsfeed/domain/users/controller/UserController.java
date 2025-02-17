@@ -1,5 +1,6 @@
 package com.newsfeed.domain.users.controller;
 
+import com.newsfeed.common.Const;
 import com.newsfeed.domain.users.dto.request.UserPasswordUpdateRequestDto;
 import com.newsfeed.domain.users.dto.response.UserProfileResponseDto;
 import com.newsfeed.domain.users.service.UserService;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping(Const.ROOT_API_PATH + "/users")
 @RequiredArgsConstructor
 public class UserController {
   private final UserService userService;
@@ -19,7 +20,6 @@ public class UserController {
   public ResponseEntity<UserProfileResponseDto> findById(@PathVariable Long id){
     UserProfileResponseDto userProfileResponseDto = userService.findById(id);
     return new ResponseEntity<>(userProfileResponseDto, HttpStatus.OK);
-
   }
 
   // 유저 비밀번호 수정
@@ -30,3 +30,4 @@ public class UserController {
   }
 
 }
+
