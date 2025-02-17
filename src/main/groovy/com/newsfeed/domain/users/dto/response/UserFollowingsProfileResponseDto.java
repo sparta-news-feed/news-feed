@@ -1,29 +1,25 @@
 package com.newsfeed.domain.users.dto.response;
+
 import com.newsfeed.domain.users.entity.User;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-// 유저 단건 조회 Dto
+// 유저 팔로잉 목록 조회 Dto
 @Getter
-public class UserProfileResponseDto {
+public class UserFollowingsProfileResponseDto {
   private Long id;
   private String email;
   private String username;
   private String address;
-  private Long followerCount;
-  private Long followingCount;
   private LocalDateTime createdAt;
   private LocalDateTime modifiedAt;
 
-  public UserProfileResponseDto(User user, Long followerCount, Long followingCount) {
+  public UserFollowingsProfileResponseDto(User user) {
     this.id = user.getId();
     this.email = user.getEmail();
     this.username = user.getUsername();
     this.address = user.getAddress(); // null 가능
-    this.followerCount = followerCount;
-    this.followingCount = followingCount;
     this.createdAt = user.getCreatedAt();
     this.modifiedAt = user.getModifiedAt();
   }
-
 }
