@@ -16,9 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 
@@ -43,6 +40,7 @@ public class PostsService {
                 savedPosts.getModifiedAt()
         );
     }
+
     @Transactional(readOnly = true)
     public Page<PostsResponseDto> findAll(int page, int size) {
         int adjustedPage = (page > 0) ? page - 1 : 0;

@@ -4,6 +4,7 @@ import com.newsfeed.common.Const;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
+import com.newsfeed.domain.posts.dto.response.PostsPageResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsUpdateResponseDto;
 import com.newsfeed.domain.posts.service.PostsService;
@@ -25,12 +26,13 @@ public class PostsController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PostsResponseDto>> findAll(
+    public ResponseEntity<PostsPageResponseDto> findAll(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Page<PostsResponseDto> responseDto = postsService.findAll(page, size);
-        return ResponseEntity.ok(responseDto);
+        PostsPageResponseDto pageDto = new PostsPageResponseDto(responseDto);
+        return ResponseEntity.ok(pageDto);
     }
 
     @GetMapping("/{postId}")
