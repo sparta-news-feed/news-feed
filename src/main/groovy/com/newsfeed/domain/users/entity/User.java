@@ -46,9 +46,9 @@ public class User extends BaseEntity {
     }
 
     public void deleteUser() {
-        this.password = null;
-        this.username = null;
-        this.address = null;
+        this.password = "";
+        this.username = "";
+        this.address = "";
         this.deletedAt = LocalDateTime.now();
     }
 
