@@ -34,7 +34,7 @@ public class PostsController {
         return ResponseEntity.ok(postsService.create(userId, dto));
     }
 
-    @GetMapping
+    @GetMapping("/find/all")
     public ResponseEntity<PostsPageResponseDto> findAll(
             @RequestParam(name = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -48,7 +48,7 @@ public class PostsController {
         return ResponseEntity.ok(pageDto);
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/find/{postId}")
     public ResponseEntity<PostsResponseDto> findOne(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(postsService.findOne(postId));
     }
