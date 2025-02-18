@@ -62,8 +62,8 @@ public class UserController {
     // 유저 단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<UserProfileResponseDto> findById(
-        @RequestHeader(name = "Authorization") String authorization
-        ,@PathVariable(name = "id") Long id) {
+        @RequestHeader(name = "Authorization") String authorization,
+        @PathVariable(name = "id") Long id) {
         Long userId = JwtUtil.extractUserId(authorization);
         UserProfileResponseDto userProfileResponseDto = userService.findById(userId,id);
         return new ResponseEntity<>(userProfileResponseDto, HttpStatus.OK);
@@ -73,7 +73,7 @@ public class UserController {
     @PatchMapping
     public ResponseEntity<Void> updatePassword(
         @RequestHeader(name = "Authorization") String authorization,
-        @RequestBody UserPasswordUpdateRequestDto requestDto) {
+       @Valid @RequestBody UserPasswordUpdateRequestDto requestDto) {
         Long userId = JwtUtil.extractUserId(authorization);
         userService.updatePassword(userId,requestDto.getOldPassword(), requestDto.getNewPassword());
         return new ResponseEntity<>(HttpStatus.OK);
@@ -81,17 +81,22 @@ public class UserController {
 
   //팔로잉 목록 조회
   @GetMapping("/followings")
-  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowingList(@RequestHeader(name = "Authorization") String authorization) {
-    Long userId = JwtUtil.extractUserId(authorization);
-    List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
+  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowingList(
+      @RequestParam(name = "userId", required = false) Long userId,
+      @RequestHeader(name = "Authorization") String authorization) {
+    Long getUserId = (userId != null) ? userId : JwtUtil.extractUserId(authorization);
+    List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(getUserId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   //팔로워 목록 조회
   @GetMapping("/followers")
-  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(@RequestHeader(name = "Authorization") String authorization) {
-    Long userId = JwtUtil.extractUserId(authorization);
-    List<UserFollowingsProfileResponseDto> response = userService.getFollowerList(userId);
+  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(
+      @RequestParam(name = "userId", required = false) Long userId,
+      @RequestHeader(name = "Authorization") String authorization
+  ) {
+    Long getUserId = (userId != null) ? userId : JwtUtil.extractUserId(authorization);
+    List<UserFollowingsProfileResponseDto> response = userService.getFollowerList(getUserId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
