@@ -61,7 +61,7 @@ public class PostsService {
         Page<Posts> postsPage;
 
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이후일 수 없습니다.");
+            throw new ApplicationException("시작 날짜는 종료 날짜보다 이후일 수 없습니다.", HttpStatus.BAD_REQUEST);
         }
 
         if (startDate == null || endDate == null) {
