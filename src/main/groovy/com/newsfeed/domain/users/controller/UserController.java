@@ -73,7 +73,7 @@ public class UserController {
     // 유저 회원 탈퇴
     @DeleteMapping
     public ResponseEntity<MessageResponse> deleteUser(
-            @RequestHeader(name = "Authorization") String authorization,
+            @RequestHeader(name = "Authorization") String authorization,    // 로그인한 유저 쓰려면 필수
             @RequestBody UserDeleteRequestDto requestDto
     ) {
         Long userId = JwtUtil.extractUserId(authorization);     // 로그인한 유저 Token 가져와서 id로 받기

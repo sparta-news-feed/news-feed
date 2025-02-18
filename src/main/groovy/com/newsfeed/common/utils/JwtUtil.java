@@ -41,12 +41,14 @@ public class JwtUtil {
     // JWT userId 추출
     public static Long extractUserId(String authorization) {
         String token = authorization.substring(7);
-        return Long.parseLong(Jwts.parser()
+        return Long.parseLong(
+                Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .getSubject());
+                .getSubject()
+        );
     }
 
     // 토큰 즉시 만료 시켜서 로그아웃
