@@ -1,6 +1,7 @@
 package com.newsfeed.domain.posts.service;
 
 
+import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
@@ -9,14 +10,18 @@ import com.newsfeed.domain.posts.dto.response.PostsUpdateResponseDto;
 import com.newsfeed.domain.posts.entity.Posts;
 import com.newsfeed.domain.posts.repository.PostsRepository;
 
+import com.newsfeed.domain.users.entity.User;
+import com.newsfeed.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,18 +29,26 @@ import java.time.LocalDateTime;
 public class PostsService {
 
     private final PostsRepository postsRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public PostsCreateResponseDto create(PostsCreateRequestDto dto) {
+    public PostsCreateResponseDto create(Long userId, PostsCreateRequestDto dto) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new ApplicationException("해당 아이디와 일치하는 유저가 없습니다. id = " + userId, HttpStatus.NOT_FOUND);
+        }
+        User user = optionalUser.get();
 
         Posts posts = new Posts(
                 dto.getTitle(),
-                dto.getContents()
+                dto.getContents(),
+                user
         );
         Posts savedPosts = postsRepository.save(posts);
 
         return new PostsCreateResponseDto(
                 savedPosts.getPostId(),
+                savedPosts.getUser().getUsername(),
                 savedPosts.getTitle(),
                 savedPosts.getContents(),
                 savedPosts.getCreatedAt(),

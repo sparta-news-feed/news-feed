@@ -1,6 +1,7 @@
 package com.newsfeed.domain.posts.controller;
 
 import com.newsfeed.common.Const;
+import com.newsfeed.common.utils.JwtUtil;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
@@ -25,8 +26,12 @@ public class PostsController {
     private final PostsService postsService;
 
     @PostMapping
-    public ResponseEntity<PostsCreateResponseDto> create(@RequestBody PostsCreateRequestDto dto) {
-        return ResponseEntity.ok(postsService.create(dto));
+    public ResponseEntity<PostsCreateResponseDto> create(
+            @RequestHeader(name = "Authorization") String authorization,
+            @RequestBody PostsCreateRequestDto dto) {
+
+        Long userId = JwtUtil.extractUserId(authorization);
+        return ResponseEntity.ok(postsService.create(userId, dto));
     }
 
     @GetMapping
