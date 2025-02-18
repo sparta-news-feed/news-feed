@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+// 예외는 잡는 것과, 던지는 것 2가지의 개념
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -18,6 +19,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleApplicationException(ApplicationException ex) {
         return getErrorResponse(ex.getStatus(), ex.getMessage());
     }
+
 
     // 유효성 검사 실패
     @ExceptionHandler(MethodArgumentNotValidException.class)
