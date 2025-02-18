@@ -2,6 +2,7 @@ package com.newsfeed.domain.users.controller;
 
 import com.newsfeed.common.Const;
 import com.newsfeed.common.dto.response.MessageResponse;
+import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.common.utils.JwtUtil;
 import com.newsfeed.domain.users.dto.request.UserDeleteRequestDto;
 import com.newsfeed.domain.users.dto.request.UserLoginRequestDto;
@@ -39,11 +40,18 @@ public class UserController {
 
     // 유저 로그인
     @PostMapping("/login")
-    public ResponseEntity<MessageResponse> login(@Valid @RequestBody UserLoginRequestDto requestDto) {
-        UserProfileResponseDto response = userService.login(requestDto.getEmail(), requestDto.getPassword());
+    public ResponseEntity<MessageResponse> login(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @Valid @RequestBody UserLoginRequestDto requestDto
+    ) {
+        if (authorization != null) {
+            throw new ApplicationException("이미 로그인된 유저입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        Long userId = userService.login(requestDto.getEmail(), requestDto.getPassword());
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + JwtUtil.generateToken(response.getId()));
+        httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + JwtUtil.generateToken(userId));
 
         return new ResponseEntity<>(new MessageResponse("로그인에 성공했습니다."), httpHeaders, HttpStatus.OK);
     }
@@ -62,38 +70,40 @@ public class UserController {
     // 유저 단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<UserProfileResponseDto> findById(
-        @RequestHeader(name = "Authorization") String authorization
-        ,@PathVariable(name = "id") Long id) {
+            @RequestHeader(name = "Authorization") String authorization,
+            @PathVariable(name = "id") Long id
+    ) {
         Long userId = JwtUtil.extractUserId(authorization);
-        UserProfileResponseDto userProfileResponseDto = userService.findById(userId,id);
+        UserProfileResponseDto userProfileResponseDto = userService.findById(userId, id);
         return new ResponseEntity<>(userProfileResponseDto, HttpStatus.OK);
     }
 
     // 유저 비밀번호 수정
     @PatchMapping
     public ResponseEntity<Void> updatePassword(
-        @RequestHeader(name = "Authorization") String authorization,
-        @RequestBody UserPasswordUpdateRequestDto requestDto) {
+            @RequestHeader(name = "Authorization") String authorization,
+            @RequestBody UserPasswordUpdateRequestDto requestDto
+    ) {
         Long userId = JwtUtil.extractUserId(authorization);
-        userService.updatePassword(userId,requestDto.getOldPassword(), requestDto.getNewPassword());
+        userService.updatePassword(userId, requestDto.getOldPassword(), requestDto.getNewPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-  //팔로잉 목록 조회
-  @GetMapping("/followings")
-  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowingList(@RequestHeader(name = "Authorization") String authorization) {
-    Long userId = JwtUtil.extractUserId(authorization);
-    List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
-    return new ResponseEntity<>(response, HttpStatus.OK);
-  }
+    //팔로잉 목록 조회
+    @GetMapping("/followings")
+    public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowingList(@RequestHeader(name = "Authorization") String authorization) {
+        Long userId = JwtUtil.extractUserId(authorization);
+        List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
-  //팔로워 목록 조회
-  @GetMapping("/followers")
-  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(@RequestHeader(name = "Authorization") String authorization) {
-    Long userId = JwtUtil.extractUserId(authorization);
-    List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
-    return new ResponseEntity<>(response, HttpStatus.OK);
-  }
+    //팔로워 목록 조회
+    @GetMapping("/followers")
+    public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(@RequestHeader(name = "Authorization") String authorization) {
+        Long userId = JwtUtil.extractUserId(authorization);
+        List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     // 유저 회원 탈퇴
     @DeleteMapping
