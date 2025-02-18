@@ -51,8 +51,8 @@ public class UserService {
 
     User findUser = findUserById(targetUserId);
     // 팔로워와 팔로잉수 가져오기
-    Long followerCount = followerRepository.countByFollower(findUser);
-    Long followingCount = followerRepository.countByFollowing(findUser);
+    Long followerCount = followerRepository.countByFollowing(findUser);
+    Long followingCount = followerRepository.countByFollower(findUser);
     // 로그인한 아이디(userId)와 조회 할 아이디(targetUserId)가 같을 경우 모두 출력
     if(userId.equals(targetUserId)) {
       return new UserProfileResponseDto(
@@ -120,26 +120,28 @@ public class UserService {
     findUser.deleteUser();
   }
 
-  // 유저의 팔로잉 목록 조회
+  // 유저의 팔로잉 목록 조회 리스트
   public List<UserFollowingsProfileResponseDto> getFollowingList(Long userId) {
-    User findUser = findUserById(userId);
-    List<Follower> followings = followerRepository.findByFollower(findUser);
-    List<UserFollowingsProfileResponseDto> followingDtos = new ArrayList<>();
-    for (Follower following : followings) {
-      followingDtos.add(new UserFollowingsProfileResponseDto(following.getFollowing()));
+    User loginUser = findUserById(userId);
+    List<Follower> followingList = followerRepository.findByFollower(loginUser); // 내가 팔로우한 사람들
+    List<UserFollowingsProfileResponseDto> responseDtos = new ArrayList<>();
+
+    for (Follower following : followingList) {
+      responseDtos.add(new UserFollowingsProfileResponseDto(following.getFollowing())); // 내가 팔로우한 사람 정보 가져오기
     }
-    return followingDtos;
+    return responseDtos;
   }
 
   // 유저의 팔로워 목록 조회
-  public List<UserProfileResponseDto> getFollowerList(Long userId) {
-    User findUser = findUserById(userId);
-    List<Follower> followers = followerRepository.findByFollowing(findUser);
-    List<UserProfileResponseDto> followerDtos = new ArrayList<>();
-    for (Follower follower : followers) {
-      followerDtos.add(new UserProfileResponseDto(follower.getFollower(), 0L, 0L));
+  public List<UserFollowingsProfileResponseDto> getFollowerList(Long userId) {
+    User loginUser = findUserById(userId);
+    List<Follower> followerList = followerRepository.findByFollowing(loginUser); // 나를 팔로우한 사람들
+    List<UserFollowingsProfileResponseDto> responseDtos = new ArrayList<>();
+
+    for (Follower follower : followerList) {
+      responseDtos.add(new UserFollowingsProfileResponseDto(follower.getFollower())); // 나를 팔로우 한 사람 정보 가져오기
     }
-    return followerDtos;
+    return responseDtos;
   }
 
   // 해당 이메일을 가진 유저가 있는지 조회
