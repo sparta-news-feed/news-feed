@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
-
+// 유저 단건 조회 Dto
 @Getter
 @RequiredArgsConstructor
 public class UserProfileResponseDto {
@@ -27,5 +27,7 @@ public class UserProfileResponseDto {
     this.createdAt = user.getCreatedAt();
     this.modifiedAt = user.getModifiedAt();
   }
+
+
 
 }

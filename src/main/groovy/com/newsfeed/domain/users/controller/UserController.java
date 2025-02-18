@@ -7,6 +7,7 @@ import com.newsfeed.domain.users.dto.request.UserDeleteRequestDto;
 import com.newsfeed.domain.users.dto.request.UserLoginRequestDto;
 import com.newsfeed.domain.users.dto.request.UserPasswordUpdateRequestDto;
 import com.newsfeed.domain.users.dto.request.UserSignUpRequestDto;
+import com.newsfeed.domain.users.dto.response.UserFollowingsProfileResponseDto;
 import com.newsfeed.domain.users.dto.response.UserProfileResponseDto;
 import com.newsfeed.domain.users.service.UserService;
 import jakarta.validation.Valid;
@@ -15,6 +16,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(Const.ROOT_API_PATH + "/users")
@@ -58,17 +61,39 @@ public class UserController {
 
     // 유저 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<UserProfileResponseDto> findById(@PathVariable(name = "id") Long id) {
-        UserProfileResponseDto userProfileResponseDto = userService.findById(id);
+    public ResponseEntity<UserProfileResponseDto> findById(
+        @RequestHeader(name = "Authorization") String authorization
+        ,@PathVariable(name = "id") Long id) {
+        Long userId = JwtUtil.extractUserId(authorization);
+        UserProfileResponseDto userProfileResponseDto = userService.findById(userId,id);
         return new ResponseEntity<>(userProfileResponseDto, HttpStatus.OK);
     }
 
     // 유저 비밀번호 수정
     @PatchMapping
-    public ResponseEntity<Void> updatePassword(@RequestBody UserPasswordUpdateRequestDto requestDto) {
-        userService.updatePassword(requestDto.getOldPassword(), requestDto.getNewPassword());
+    public ResponseEntity<Void> updatePassword(
+        @RequestHeader(name = "Authorization") String authorization,
+        @RequestBody UserPasswordUpdateRequestDto requestDto) {
+        Long userId = JwtUtil.extractUserId(authorization);
+        userService.updatePassword(userId,requestDto.getOldPassword(), requestDto.getNewPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+  //팔로잉 목록 조회
+  @GetMapping("/followings")
+  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowingList(@RequestHeader(name = "Authorization") String authorization) {
+    Long userId = JwtUtil.extractUserId(authorization);
+    List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  //팔로워 목록 조회
+  @GetMapping("/followers")
+  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(@RequestHeader(name = "Authorization") String authorization) {
+    Long userId = JwtUtil.extractUserId(authorization);
+    List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
 
     // 유저 회원 탈퇴
     @DeleteMapping
