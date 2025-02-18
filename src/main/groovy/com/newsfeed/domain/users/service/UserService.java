@@ -137,7 +137,7 @@ public class UserService {
     User loginUser = findUserById(userId);
     List<Follower> followerList = followerRepository.findByFollowing(loginUser); // 나를 팔로우한 사람들
     List<UserFollowingsProfileResponseDto> responseDtos = new ArrayList<>();
-
+    int a = 10;
     for (Follower follower : followerList) {
       responseDtos.add(new UserFollowingsProfileResponseDto(follower.getFollower())); // 나를 팔로우 한 사람 정보 가져오기
     }
