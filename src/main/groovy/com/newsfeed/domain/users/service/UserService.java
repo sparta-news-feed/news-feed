@@ -48,11 +48,12 @@ public class UserService {
 
   // 유저 단건 조회
   public UserProfileResponseDto findById(Long userId, Long targetUserId) {
+
     User findUser = findUserById(targetUserId);
     // 팔로워와 팔로잉수 가져오기
     Long followerCount = followerRepository.countByFollower(findUser);
     Long followingCount = followerRepository.countByFollowing(findUser);
-    // 로그인한 아이디와 조회 아이디가 같을 경우 모두 출력
+    // 로그인한 아이디(userId)와 조회 할 아이디(targetUserId)가 같을 경우 모두 출력
     if(userId.equals(targetUserId)) {
       return new UserProfileResponseDto(
           findUser.getId(),
@@ -66,7 +67,7 @@ public class UserService {
       );
     }
 
-    // 로그인한 유저와 다를 경우 주소만 null 처리
+    // 로그인한 아이디(userId)와 조회 할 아이디(targetUserId)가 다를 경우 주소 null 처리
     return new UserProfileResponseDto(
         findUser.getId(),
         findUser.getEmail(),
@@ -84,17 +85,16 @@ public class UserService {
     User findUser = findUserById(userId);
     // 비밀번호 수정 시, 본인 확인을 위해 입력한 현재 비밀번호가 일치하지 않은 경우 예외처리
     if (!passwordEncoder.matches(oldPassword, findUser.getPassword())) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+      throw new ApplicationException("기존의 비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
     }
     // 비밀번호 형식이 올바르지 않은 경우 예외처리
     if (!isValidPassword(newPassword)){
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호 형식이 일치하지 않습니다.");
+      throw new ApplicationException("비밀번호 형식이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
     }
 
     // 현재 비밀번호와 동일한 비밀번호로 수정하는 경우
     if (passwordEncoder.matches(newPassword, findUser.getPassword())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호를 기존의 비밀번호와 동일하게 변경할 수 없습니다.");
-    }
+      throw new ApplicationException("새 비밀번호를 기존의 비밀번호와 동일하게 변경할 수 없습니다.", HttpStatus.BAD_REQUEST);    }
 
     findUser.updatePassword(passwordEncoder.encode(newPassword));
     userRepository.save(findUser);
