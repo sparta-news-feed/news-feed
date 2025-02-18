@@ -120,7 +120,7 @@ public class UserService {
     findUser.deleteUser();
   }
 
-  // 유저의 팔로잉 목록 조회
+  // 유저의 팔로잉 목록 조회 리스트
   public List<UserFollowingsProfileResponseDto> getFollowingList(Long userId) {
     User loginUser = findUserById(userId);
     List<Follower> followingList = followerRepository.findByFollower(loginUser); // 내가 팔로우한 사람들
