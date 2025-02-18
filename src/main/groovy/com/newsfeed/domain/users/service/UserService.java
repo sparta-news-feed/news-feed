@@ -142,6 +142,7 @@ public class UserService {
     return followerDtos;
   }
 
+
   // 해당 이메일을 가진 유저가 있는지 조회
   public boolean existsByEmail(String email) {
     return userRepository.existsByEmail(email);
