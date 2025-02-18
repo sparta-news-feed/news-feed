@@ -10,11 +10,13 @@ import com.newsfeed.domain.posts.entity.Posts;
 import com.newsfeed.domain.posts.repository.PostsRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -40,25 +42,29 @@ public class PostsService {
                 savedPosts.getModifiedAt()
         );
     }
+
     @Transactional(readOnly = true)
-    public List<PostsResponseDto> findAll() {
+    public Page<PostsResponseDto> findAll(LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
+        int adjustedPage = (page > 0) ? page - 1 : 0;
+        PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("modifiedAt").descending());
+        Page<Posts> postsPage;
 
-        postsRepository.findAll();
-
-        List<Posts> postsList = postsRepository.findAll();
-
-        List<PostsResponseDto> dtos = new ArrayList<>();
-
-        for (Posts post : postsList) {
-            dtos.add(new PostsResponseDto(
-                    post.getPostId(),
-                    post.getTitle(),
-                    post.getContents(),
-                    post.getCreatedAt(),
-                    post.getModifiedAt()
-            ));
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이후일 수 없습니다.");
         }
-        return dtos;
+
+        if (startDate == null || endDate == null) {
+            postsPage = postsRepository.findAll(pageable);
+        } else {
+            postsPage = postsRepository.findByCreatedAtBetween(startDate, endDate, pageable);
+        }
+        return postsPage.map(posts -> new PostsResponseDto(
+                posts.getPostId(),
+                posts.getTitle(),
+                posts.getContents(),
+                posts.getCreatedAt(),
+                posts.getModifiedAt()
+        ));
     }
 
     @Transactional(readOnly = true)
