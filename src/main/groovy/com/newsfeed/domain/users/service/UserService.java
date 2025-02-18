@@ -1,5 +1,6 @@
 package com.newsfeed.domain.users.service;
 
+import com.newsfeed.common.Const;
 import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.config.PasswordEncoder;
 import com.newsfeed.domain.followers.entity.Follower;
@@ -45,7 +46,7 @@ public class UserService {
     return new UserProfileResponseDto(findUser, 0L, 0L);
   }
 
-  // 유저 단건 조회 (JWT 기반 비교)
+  // 유저 단건 조회
   public UserProfileResponseDto findById(Long userId, Long targetUserId) {
     User findUser = findUserById(targetUserId);
     // 팔로워와 팔로잉수 가져오기
@@ -81,13 +82,29 @@ public class UserService {
   // 유저 비밀번호 수정
   public void updatePassword(Long userId, String oldPassword, String newPassword) {
     User findUser = findUserById(userId);
+    // 비밀번호 수정 시, 본인 확인을 위해 입력한 현재 비밀번호가 일치하지 않은 경우 예외처리
     if (!passwordEncoder.matches(oldPassword, findUser.getPassword())) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+    }
+    // 비밀번호 형식이 올바르지 않은 경우 예외처리
+    if (!isValidPassword(newPassword)){
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호 형식이 일치하지 않습니다.");
+    }
+
+    // 현재 비밀번호와 동일한 비밀번호로 수정하는 경우
+    if (passwordEncoder.matches(newPassword, findUser.getPassword())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호를 기존의 비밀번호와 동일하게 변경할 수 없습니다.");
     }
 
     findUser.updatePassword(passwordEncoder.encode(newPassword));
     userRepository.save(findUser);
+
   }
+  // 비밀번호 검증 메서드
+  private boolean isValidPassword(String newPassword) {
+    return newPassword.matches(Const.PASSWORD_PATTERN);
+  }
+
 
   @Transactional
   public void deleteUser(Long userId, String password) {
