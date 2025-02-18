@@ -9,7 +9,7 @@ public class ApplicationException extends RuntimeException {
     private final HttpStatus status;
 
     public ApplicationException(String message, HttpStatus status) {
-        super(message);
+        super(message);         // 부모의 생성자
         this.status = status;
     }
 }
