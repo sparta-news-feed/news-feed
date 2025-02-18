@@ -9,9 +9,13 @@ import com.newsfeed.domain.posts.dto.response.PostsResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsUpdateResponseDto;
 import com.newsfeed.domain.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,10 +31,14 @@ public class PostsController {
 
     @GetMapping
     public ResponseEntity<PostsPageResponseDto> findAll(
+            @RequestParam(name = "startDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(name = "endDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        Page<PostsResponseDto> responseDto = postsService.findAll(page, size);
+        Page<PostsResponseDto> responseDto = postsService.findAll(startDate, endDate, page, size);
         PostsPageResponseDto pageDto = new PostsPageResponseDto(responseDto);
         return ResponseEntity.ok(pageDto);
     }

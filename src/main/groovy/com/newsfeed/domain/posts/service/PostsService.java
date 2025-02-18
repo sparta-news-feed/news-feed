@@ -16,6 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 
@@ -42,10 +44,16 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostsResponseDto> findAll(int page, int size) {
+    public Page<PostsResponseDto> findAll(LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         int adjustedPage = (page > 0) ? page - 1 : 0;
         PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("createdAt").descending());
-        Page<Posts> postsPage = postsRepository.findAll(pageable);
+        Page<Posts> postsPage;
+
+        if (startDate == null || endDate == null) {
+            postsPage = postsRepository.findAll(pageable);
+        } else {
+            postsPage = postsRepository.findByCreatedAtBetween(startDate, endDate, pageable);
+        }
         return postsPage.map(posts -> new PostsResponseDto(
                 posts.getPostId(),
                 posts.getTitle(),
