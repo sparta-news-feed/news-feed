@@ -49,6 +49,10 @@ public class PostsService {
         PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("modifiedAt").descending());
         Page<Posts> postsPage;
 
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이후일 수 없습니다.");
+        }
+
         if (startDate == null || endDate == null) {
             postsPage = postsRepository.findAll(pageable);
         } else {
