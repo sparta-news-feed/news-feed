@@ -91,7 +91,7 @@ public class UserController {
   @GetMapping("/followers")
   public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(@RequestHeader(name = "Authorization") String authorization) {
     Long userId = JwtUtil.extractUserId(authorization);
-    List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
+    List<UserFollowingsProfileResponseDto> response = userService.getFollowerList(userId);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 

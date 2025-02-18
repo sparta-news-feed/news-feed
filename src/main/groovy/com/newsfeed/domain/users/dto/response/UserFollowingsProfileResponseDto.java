@@ -10,7 +10,6 @@ public class UserFollowingsProfileResponseDto {
   private Long id;
   private String email;
   private String username;
-  private String address;
   private LocalDateTime createdAt;
   private LocalDateTime modifiedAt;
 
@@ -18,7 +17,6 @@ public class UserFollowingsProfileResponseDto {
     this.id = user.getId();
     this.email = user.getEmail();
     this.username = user.getUsername();
-    this.address = user.getAddress(); // null 가능
     this.createdAt = user.getCreatedAt();
     this.modifiedAt = user.getModifiedAt();
   }

@@ -19,7 +19,8 @@ public class LoginFilter implements Filter {
     private static final String[] WHITE_LIST = {
             "/",
             Const.ROOT_API_PATH + "/users/signup",
-            Const.ROOT_API_PATH + "/users/login"
+            Const.ROOT_API_PATH + "/users/login",
+            Const.ROOT_API_PATH + "/posts/find/*"
     };
 
     @Override
