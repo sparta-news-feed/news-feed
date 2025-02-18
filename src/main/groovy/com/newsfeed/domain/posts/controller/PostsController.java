@@ -4,7 +4,6 @@ import com.newsfeed.common.Const;
 import com.newsfeed.common.utils.JwtUtil;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsDeleteRequestDto;
-
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsPageResponseDto;
@@ -12,8 +11,6 @@ import com.newsfeed.domain.posts.dto.response.PostsResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsUpdateResponseDto;
 import com.newsfeed.domain.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,9 +42,8 @@ public class PostsController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        Page<PostsResponseDto> responseDto = postsService.findAll(startDate, endDate, page, size);
-        PostsPageResponseDto pageDto = new PostsPageResponseDto(responseDto);
-        return ResponseEntity.ok(pageDto);
+        PostsPageResponseDto responseDto = postsService.findAll(startDate, endDate, page, size);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/find/{postId}")
