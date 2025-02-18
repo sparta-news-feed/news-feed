@@ -10,13 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(Const.ROOT_API_PATH + "/comments")
 public class CommentController {
 
     private final CommentService commentService;
-    private final PostsService postsService;
 
     //댓글 작성
     @PostMapping
@@ -25,8 +26,13 @@ public class CommentController {
             @RequestBody CommentCreateRequestDto requestDto
     ) {
         Long userId = JwtUtil.extractUserId(authorization); // 유저아이디 가져옴 :JWT 토큰에서 userId 추출
-        CommentResponseDto responseDto = commentService.createComment(userId, requestDto.getPostId(), requestDto.getContents());
 
+        return ResponseEntity.ok(commentService.createComment(userId, requestDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CommentResponseDto>> findAllComment() {
+        List<CommentResponseDto> responseDto = commentService.findAllComment();
         return ResponseEntity.ok(responseDto);
     }
 }

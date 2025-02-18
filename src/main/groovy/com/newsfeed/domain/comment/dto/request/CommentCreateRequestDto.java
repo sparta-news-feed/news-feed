@@ -7,9 +7,6 @@ import lombok.Getter;
 @Getter
 public class CommentCreateRequestDto {
 
-//    @NotNull(message = "유효한 id값이 없습니다.")
-//    private Long userId;
-
     @NotNull(message = "유효한 id값이 없습니다.")
     private Long postId;
 

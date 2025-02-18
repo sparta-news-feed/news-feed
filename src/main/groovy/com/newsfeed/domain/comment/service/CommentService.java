@@ -1,6 +1,7 @@
 package com.newsfeed.domain.comment.service;
 
 import com.newsfeed.common.utils.JwtUtil;
+import com.newsfeed.domain.comment.dto.request.CommentCreateRequestDto;
 import com.newsfeed.domain.comment.dto.response.CommentResponseDto;
 import com.newsfeed.domain.comment.entity.Comment;
 import com.newsfeed.domain.comment.repository.CommentRepository;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -21,21 +24,35 @@ public class CommentService {
     private final PostsRepository postsRepository;
 
     @Transactional
-    public CommentResponseDto createComment(Long userId, Long postId, String contents) {
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다.")); //jwt 사용해야하나요?
+    public CommentResponseDto createComment(Long userId, CommentCreateRequestDto requestDto) {
+        User findUser = userRepository.findByUserIdOrElseThrow(userId); //유저 찾기
 
-        Posts findPosts = postsRepository.findById(postId)
+        Posts findPosts = postsRepository.findById(requestDto.getPostId()) //
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
-        Comment comment = Comment.builder()
-                .user(user)
-                .posts(posts)
-                .contents(contents)
-                .build();
+        // 댓글 객체생성
+        Comment comment = new Comment(
+                findUser,
+                findPosts,
+                requestDto.getContents()
+        );
 
-        commentRepository.save(comment);
+        //댓글 저장 ???
+        Comment savedComment = commentRepository.save(comment);
 
-        return new CommentResponseDto(comment);
+        return new CommentResponseDto(
+                savedComment.getCommentId(),
+                savedComment.getPosts().getPostId(),
+                savedComment.getUser().getUsername(),
+                savedComment.getContents(),
+                savedComment.getCreatedAt(),
+                savedComment.getModifiedAt()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentResponseDto> findAllComment(
+
+    ) {
     }
 }
