@@ -73,6 +73,7 @@ public class PostsService {
         }
         return postsPage.map(posts -> new PostsResponseDto(
                 posts.getPostId(),
+                posts.getUser().getUsername(),
                 posts.getTitle(),
                 posts.getContents(),
                 posts.getCreatedAt(),
@@ -86,6 +87,7 @@ public class PostsService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다."));
         return new PostsResponseDto(
                 posts.getPostId(),
+                posts.getUser().getUsername(),
                 posts.getTitle(),
                 posts.getContents(),
                 posts.getCreatedAt(),
@@ -109,6 +111,7 @@ public class PostsService {
 
         return new PostsUpdateResponseDto(
                 posts.getPostId(),
+                posts.getUser().getUsername(),
                 posts.getTitle(),
                 posts.getContents(),
                 posts.getCreatedAt(),
