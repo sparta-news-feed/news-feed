@@ -46,7 +46,7 @@ public class PostsService {
     @Transactional(readOnly = true)
     public Page<PostsResponseDto> findAll(LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         int adjustedPage = (page > 0) ? page - 1 : 0;
-        PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("createdAt").descending());
+        PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("modifiedAt").descending());
         Page<Posts> postsPage;
 
         if (startDate == null || endDate == null) {
