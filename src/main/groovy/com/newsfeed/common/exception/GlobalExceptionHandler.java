@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 // 예외는 잡는 것과, 던지는 것 2가지의 개념
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
