@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,7 @@ public class PostsService {
 
     @Transactional
     public PostsCreateResponseDto create(Long userId, PostsCreateRequestDto dto) {
-        User findUser = userRepository.findByIdOrElseThrow(userId);
+        User findUser = userRepository.findByUserIdOrElseThrow(userId);
         Posts posts = new Posts(
                 dto.getTitle(),
                 dto.getContents(),
@@ -81,8 +80,7 @@ public class PostsService {
 
     @Transactional(readOnly = true)
     public PostsResponseDto findOne(Long postId) {
-        Posts posts = postsRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다."));
+        Posts posts = postsRepository.findByPostsIdOrElseThrow(postId);
         return new PostsResponseDto(
                 posts.getPostId(),
                 posts.getUser().getUsername(),
@@ -95,10 +93,9 @@ public class PostsService {
 
     @Transactional
     public PostsUpdateResponseDto update(Long userId, Long postId, PostsUpdateRequestDto dto) {
-        User findUser = userRepository.findByIdOrElseThrow(userId);
+        User findUser = userRepository.findByUserIdOrElseThrow(userId);
 
-        Posts posts = postsRepository.findById(postId).orElseThrow(
-                () -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다."));
+        Posts posts = postsRepository.findByPostsIdOrElseThrow(postId);
 
         if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
             throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
@@ -121,9 +118,8 @@ public class PostsService {
 
     @Transactional
     public void deleteById(Long userId, Long postId, PostsDeleteRequestDto dto) {
-        User findUser = userRepository.findByIdOrElseThrow(userId);
-        Posts posts = postsRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다."));
+        User findUser = userRepository.findByUserIdOrElseThrow(userId);
+        Posts posts = postsRepository.findByPostsIdOrElseThrow(postId);
 
         if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
             throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
