@@ -2,7 +2,9 @@ package com.newsfeed.domain.posts.service;
 
 
 import com.newsfeed.common.exception.ApplicationException;
+import com.newsfeed.config.PasswordEncoder;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
+import com.newsfeed.domain.posts.dto.request.PostsDeleteRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsResponseDto;
@@ -30,19 +32,15 @@ public class PostsService {
 
     private final PostsRepository postsRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public PostsCreateResponseDto create(Long userId, PostsCreateRequestDto dto) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new ApplicationException("해당 아이디와 일치하는 유저가 없습니다. id = " + userId, HttpStatus.NOT_FOUND);
-        }
-        User user = optionalUser.get();
-
+        User findUser = userRepository.findByIdOrElseThrow(userId);
         Posts posts = new Posts(
                 dto.getTitle(),
                 dto.getContents(),
-                user
+                findUser
         );
         Posts savedPosts = postsRepository.save(posts);
 
@@ -96,13 +94,15 @@ public class PostsService {
     }
 
     @Transactional
-    public PostsUpdateResponseDto update(Long postId, PostsUpdateRequestDto dto) {
+    public PostsUpdateResponseDto update(Long userId, Long postId, PostsUpdateRequestDto dto) {
+        User findUser = userRepository.findByIdOrElseThrow(userId);
+
         Posts posts = postsRepository.findById(postId).orElseThrow(
                 () -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다."));
 
-        /// if (!userId.equals(posts.getUser().getId())) {
-        ///             throw new IllegalArgumentException("본인이 작성한 스케줄만 수정할 수 있습니다.");
-        ///         }
+        if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
+            throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
 
         posts.update(
                 dto.getTitle(),
@@ -120,12 +120,14 @@ public class PostsService {
     }
 
     @Transactional
-    public void deleteById(Long postId) {
+    public void deleteById(Long userId, Long postId, PostsDeleteRequestDto dto) {
+        User findUser = userRepository.findByIdOrElseThrow(userId);
         Posts posts = postsRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다."));
-        //if (!userId.equals(posts.getUser().getId())) {
-        //            throw new IllegalArgumentException("본인이 작성한 스케줄만 삭제할 수 있습니다.");
-        //        }
+
+        if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
+            throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
         postsRepository.delete(posts);
     }
 }
