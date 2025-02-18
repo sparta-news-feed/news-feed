@@ -97,13 +97,13 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    //팔로워 목록 조회
-    @GetMapping("/followers")
-    public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(@RequestHeader(name = "Authorization") String authorization) {
-        Long userId = JwtUtil.extractUserId(authorization);
-        List<UserFollowingsProfileResponseDto> response = userService.getFollowingList(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+  //팔로워 목록 조회
+  @GetMapping("/followers")
+  public ResponseEntity<List<UserFollowingsProfileResponseDto>> getFollowerList(@RequestHeader(name = "Authorization") String authorization) {
+    Long userId = JwtUtil.extractUserId(authorization);
+    List<UserFollowingsProfileResponseDto> response = userService.getFollowerList(userId);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
 
     // 유저 회원 탈퇴
     @DeleteMapping

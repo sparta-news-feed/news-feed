@@ -8,8 +8,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+  Optional<User> findByEmail(String email);
+  boolean existsByEmail(String email);
 
-    Optional<User> findByEmail(String email);
+  default User findByUserIdOrElseThrow(Long userId) {
+    return  findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 아이디와 일치하는 유저가 없습니다. id = " + userId));
+  }
 
-    boolean existsByEmail(String email);
 }

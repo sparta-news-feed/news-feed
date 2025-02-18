@@ -1,7 +1,10 @@
 package com.newsfeed.domain.posts.controller;
 
 import com.newsfeed.common.Const;
+import com.newsfeed.common.utils.JwtUtil;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
+import com.newsfeed.domain.posts.dto.request.PostsDeleteRequestDto;
+
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsPageResponseDto;
@@ -9,7 +12,7 @@ import com.newsfeed.domain.posts.dto.response.PostsResponseDto;
 import com.newsfeed.domain.posts.dto.response.PostsUpdateResponseDto;
 import com.newsfeed.domain.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
+
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +28,15 @@ public class PostsController {
     private final PostsService postsService;
 
     @PostMapping
-    public ResponseEntity<PostsCreateResponseDto> create(@RequestBody PostsCreateRequestDto dto) {
-        return ResponseEntity.ok(postsService.create(dto));
+    public ResponseEntity<PostsCreateResponseDto> create(
+            @RequestHeader(name = "Authorization") String authorization,
+            @RequestBody PostsCreateRequestDto dto) {
+
+        Long userId = JwtUtil.extractUserId(authorization);
+        return ResponseEntity.ok(postsService.create(userId, dto));
     }
 
-    @GetMapping
+    @GetMapping("/find/all")
     public ResponseEntity<PostsPageResponseDto> findAll(
             @RequestParam(name = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -43,29 +50,30 @@ public class PostsController {
         return ResponseEntity.ok(pageDto);
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/find/{postId}")
     public ResponseEntity<PostsResponseDto> findOne(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(postsService.findOne(postId));
     }
 
     @PutMapping("/{postId}")
     public ResponseEntity<PostsUpdateResponseDto> update(
-            //@SessionAttribute(name = Const.LOGIN_USER) Long userId,
+            @RequestHeader(name = "Authorization") String authorization,
             @PathVariable("postId") Long postId,
             @RequestBody PostsUpdateRequestDto dto
     ) {
-        return  ResponseEntity.ok(postsService.update(postId, dto));
+        Long userId = JwtUtil.extractUserId(authorization);
+        return  ResponseEntity.ok(postsService.update(userId, postId, dto));
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> delete(
-            //@SessionAttribute(name = Const.LOGIN_USER) Long userId,
-            @PathVariable("postId") Long postId
+            @RequestHeader(name = "Authorization") String authorization,
+            @PathVariable("postId") Long postId,
+            @RequestBody PostsDeleteRequestDto dto
     ) {
-        postsService.deleteById(postId); //+id
+        Long userId = JwtUtil.extractUserId(authorization);
+
+        postsService.deleteById(userId, postId, dto);
         return ResponseEntity.ok().build();
     }
-
-
-
 }

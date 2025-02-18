@@ -3,8 +3,6 @@ package com.newsfeed.domain.posts.dto.request;
 import lombok.Getter;
 
 @Getter
-public class PostsUpdateRequestDto {
+public class PostsDeleteRequestDto {
     private String password;
-    private String title;
-    private String contents;
 }
