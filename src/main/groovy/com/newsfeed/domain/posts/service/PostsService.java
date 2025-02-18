@@ -94,7 +94,7 @@ public class PostsService {
     @Transactional(readOnly = true)
     public PostsResponseDto findOne(Long postId) {
         // postId로 게시물 확인 후 없으면 예외 처리
-        Posts posts = postsRepository.findByPostsIdOrElseThrow(postId);
+        Posts posts = findPostByIdOrElseThrow(postId);
         return new PostsResponseDto(
                 posts.getPostId(),
                 posts.getUser().getUsername(),
@@ -110,7 +110,7 @@ public class PostsService {
         // userId로 유저 확인 후 없으면 예외 처리
         User findUser = userService.findUserByIdOrElseThrow(userId);
         // postId로 게시물 확인 후 없으면 예외 처리
-        Posts posts = postsRepository.findByPostsIdOrElseThrow(postId);
+        Posts posts = findPostByIdOrElseThrow(postId);
 
         // 찾은 유저의 비밀번호와 입력한 비밀번호가 일치하는지 확인
         if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
@@ -138,7 +138,7 @@ public class PostsService {
         // userId로 유저 확인 후 없으면 예외 처리
         User findUser = userService.findUserByIdOrElseThrow(userId);
         // postId로 게시물 확인 후 없으면 예외 처리
-        Posts posts = postsRepository.findByPostsIdOrElseThrow(postId);
+        Posts posts = findPostByIdOrElseThrow(postId);
 
         // 찾은 유저의 비밀번호와 입력한 비밀번호가 일치하는지 확인
         if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
@@ -147,5 +147,11 @@ public class PostsService {
         }
         // 일치하면 게시물 삭제
         postsRepository.delete(posts);
+    }
+
+    // Service 레벨에서 NULL 체크 (포스트 ID)
+    public Posts findPostByIdOrElseThrow(Long postId) {
+        return postsRepository.findById(postId)
+                .orElseThrow(() -> new ApplicationException("해당 아이디와 일치하는 게시물이 없습니다. id = " + postId, HttpStatus.NOT_FOUND));
     }
 }
