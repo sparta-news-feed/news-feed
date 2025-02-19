@@ -29,7 +29,7 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "posts_id", nullable = false ) //뉴스 테이블과 조인
     private Posts posts;
 
-    public Comment(String contents) {
+    public void update(String contents) {
         this.contents = contents;
     }
 
