@@ -2,27 +2,34 @@ package com.newsfeed.domain.posts.service;
 
 import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.config.PasswordEncoder;
+import com.newsfeed.domain.followers.entity.Follower;
+import com.newsfeed.domain.followers.repository.FollowerRepository;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsDeleteRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
-import com.newsfeed.domain.posts.dto.response.PostsCreateResponseDto;
-import com.newsfeed.domain.posts.dto.response.PostsPageResponseDto;
-import com.newsfeed.domain.posts.dto.response.PostsResponseDto;
-import com.newsfeed.domain.posts.dto.response.PostsUpdateResponseDto;
+import com.newsfeed.domain.posts.dto.response.*;
 import com.newsfeed.domain.posts.entity.Posts;
 import com.newsfeed.domain.posts.repository.PostsRepository;
 import com.newsfeed.domain.users.entity.User;
+import com.newsfeed.domain.users.repository.UserRepository;
 import com.newsfeed.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 
@@ -31,6 +38,36 @@ public class PostsService {
     private final PostsRepository postsRepository;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+
+    private final FollowerRepository followerRepository;
+
+    /**
+     * "내가 팔로잉한 유저들 각각의 게시물들을 최신순으로 정렬해서 1페이지에 10개만 담아서 가져오기
+     */
+    @Transactional(readOnly = true)
+    public Page<PostByFollowingResponseDto> findPostByFollowing(Long userId) {
+
+        User findUser = userRepository.findByIdOrElseThrow(userId);
+        List<Follower> followList = followerRepository.findAllByFollowing(findUser);
+
+        List<User> followingUsers = followList.stream()
+                .map(Follower::getFollowing)
+                .collect(Collectors.toList());
+
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").ascending());
+        Page<Posts> postsPage = postsRepository.findByUserInOrderByCreatedAtDesc(followingUsers, pageRequest);
+
+        return postsPage.map(posts -> new PostByFollowingResponseDto(
+                posts.getUser().getUsername(),
+                posts.getTitle(),
+                posts.getContents(),
+                posts.getCreatedAt(),
+                posts.getModifiedAt()
+        ));
+
+
+    }
 
     @Transactional
     public PostsCreateResponseDto create(Long userId, PostsCreateRequestDto dto) {
