@@ -32,7 +32,7 @@ public class CommentController {
         return ResponseEntity.ok(commentService.createComment(userId, requestDto));
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<List<CommentResponseDto>> findPostComment(
             @PathVariable("postId") Long postId
     ) {
@@ -40,6 +40,13 @@ public class CommentController {
         return ResponseEntity.ok(responseDtos);
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<List<CommentResponseDto>> findUserComment(
+            @PathVariable("id") Long id
+    ) {
+        List<CommentResponseDto> dtos = commentService.findUserComment(id);
+        return ResponseEntity.ok(dtos);
+    }
 
 //
 //    // 사용자 기준 댓글 조회 추가
