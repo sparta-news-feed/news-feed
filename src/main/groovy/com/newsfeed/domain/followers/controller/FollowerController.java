@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(Const.ROOT_API_PATH + "followers")
+@RequestMapping(Const.ROOT_API_PATH + "/followers")
 @RequiredArgsConstructor
 
 public class FollowerController {
@@ -29,27 +29,21 @@ public class FollowerController {
     public ResponseEntity<MessageResponse> addFollowing(
             @RequestHeader(name = "Authorization") String authorization,
             @RequestBody FollowingRequestDto requestDto
-            ) {
-        JwtUtil.extractUserId(authorization); // 토큰 있는 사용자가
-        followerService.addFollowing(requestDto.getFollowing()); // 원하는 유저를 추가한다.
-
+    ) {
+        Long userId = JwtUtil.extractUserId(authorization); // 무조건 팔로워 고정
+        followerService.addFollowing(userId, requestDto.getFollowingUserId());
         return new ResponseEntity<>(new MessageResponse("팔로우에 성공했습니다."), HttpStatus.OK);
     }
+
     // 팔로잉 유저 삭제
-    @DeleteMapping
+    @DeleteMapping("/{followingUserId}")
     public ResponseEntity<MessageResponse> deleteFollowing(
             @RequestHeader(name = "Authorization") String authorization,
-            @RequestBody FollowingRequestDto requestDto
+            @PathVariable(name = "followingUserId") Long followingUserId
     ) {
-        JwtUtil.extractUserId(authorization); // 토큰 있는 사용자가
-        followerService.deleteFollowing(requestDto.getFollowing()); // 해당 유저를 삭제한다.
-
+        Long userId = JwtUtil.extractUserId(authorization);// 토큰 있는 사용자가
+        followerService.deleteFollowing(userId, followingUserId); // 해당 유저를 삭제한다.
         return new ResponseEntity<>(new MessageResponse("언팔로우에 성공했습니다."), HttpStatus.OK);
     }
-
-
-
-
-
 
 }

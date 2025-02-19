@@ -27,7 +27,6 @@ public class CommentService {
 
     public CommentResponseDto createComment(Long userId, CommentCreateRequestDto requestDto) {
         User findUser = userService.findUserByIdOrElseThrow(userId);//유저 찾기
-
         Posts findPosts = postsService.findPostByIdOrElseThrow(requestDto.getPostId());
 
         // 댓글 객체생성
@@ -38,6 +37,7 @@ public class CommentService {
         );
 
         Comment savedComment = commentRepository.save(comment);
+        findPosts.setComments(savedComment);
 
         return new CommentResponseDto(
                 savedComment.getCommentId(),
@@ -56,18 +56,20 @@ public class CommentService {
 
         List<Comment> comments = commentRepository.findByPosts(posts); // 레포지터리 추가
 
-        List<CommentResponseDto> dtos = comments.stream().map(
-                comment -> new CommentResponseDto(
-                        comment.getCommentId(),
-                        comment.getPosts().getPostId(),
-                        comment.getUser().getUsername(),
-                        comment.getContents(),
-                        comment.getCreatedAt(),
-                        comment.getModifiedAt()
+        List<CommentResponseDto> dtos = comments
+                .stream()
+                .map(comment -> new CommentResponseDto(
+                                comment.getCommentId(),
+                                comment.getPosts().getPostId(),
+                                comment.getUser().getUsername(),
+                                comment.getContents(),
+                                comment.getCreatedAt(),
+                                comment.getModifiedAt()
+                        )
                 )
-        ).toList();
-        return dtos;
+                .toList();
 
+        return dtos;
     }
 
     @Transactional(readOnly = true)
@@ -77,16 +79,20 @@ public class CommentService {
 
         List<Comment> comments = commentRepository.findByUser(user);
 
-        List<CommentResponseDto> dtos = comments.stream().map(
-                comment -> new CommentResponseDto(
-                        comment.getCommentId(),
-                        comment.getPosts().getPostId(),
-                        comment.getUser().getUsername(),
-                        comment.getContents(),
-                        comment.getCreatedAt(),
-                        comment.getModifiedAt()
+        List<CommentResponseDto> dtos = comments
+                .stream()
+                .map(
+                        comment -> new CommentResponseDto(
+                                comment.getCommentId(),
+                                comment.getPosts().getPostId(),
+                                comment.getUser().getUsername(),
+                                comment.getContents(),
+                                comment.getCreatedAt(),
+                                comment.getModifiedAt()
+                        )
                 )
-        ).toList();
+                .toList();
+
         return dtos;
     }
 
@@ -126,10 +132,6 @@ public class CommentService {
         }
 
         commentRepository.delete(comment);
-
-
     }
-
-
 
 }

@@ -5,7 +5,6 @@ import com.newsfeed.domain.posts.entity.Posts;
 import com.newsfeed.domain.users.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -13,7 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Table(name = "comments")
 public class Comment extends BaseEntity {
 
@@ -37,9 +36,11 @@ public class Comment extends BaseEntity {
         this.contents = contents;
     }
 
-    public void setUser(User user) { // 댓글-사용자 연관관계 편의 메서드 : setUser 이름 임의로 지정
+    public void setUser(User user) {
+        // 댓글-사용자 연관관계 편의 메서드 : setUser 이름 임의로 지정
+        // 연관관계 편의 메서드
         this.user = user;
-    } // 연관관계 편의 메서드
+    }
 
     public void setPosts(Posts posts) { // 댓글-게시글 연관관계 편의 메서드 : setPosts 이름 임의로 지정
         this.posts = posts;

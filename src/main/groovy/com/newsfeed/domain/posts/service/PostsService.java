@@ -2,6 +2,7 @@ package com.newsfeed.domain.posts.service;
 
 import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.config.PasswordEncoder;
+import com.newsfeed.domain.comment.repository.CommentRepository;
 import com.newsfeed.domain.followers.entity.Follower;
 import com.newsfeed.domain.followers.repository.FollowerRepository;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
@@ -39,35 +40,9 @@ public class PostsService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
     private final FollowerRepository followerRepository;
-
-    /**
-     * "내가 팔로잉한 유저들 각각의 게시물들을 최신순으로 정렬해서 1페이지에 10개만 담아서 가져오기
-     */
-    @Transactional(readOnly = true)
-    public Page<PostByFollowingResponseDto> findPostByFollowing(Long userId) {
-
-        User findUser = userRepository.findByIdOrElseThrow(userId);
-        List<Follower> followList = followerRepository.findAllByFollowing(findUser);
-
-        List<User> followingUsers = followList.stream()
-                .map(Follower::getFollowing)
-                .collect(Collectors.toList());
-
-        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").ascending());
-        Page<Posts> postsPage = postsRepository.findByUserInOrderByCreatedAtDesc(followingUsers, pageRequest);
-
-        return postsPage.map(posts -> new PostByFollowingResponseDto(
-                posts.getUser().getUsername(),
-                posts.getTitle(),
-                posts.getContents(),
-                posts.getCreatedAt(),
-                posts.getModifiedAt()
-        ));
-
-
-    }
 
     @Transactional
     public PostsCreateResponseDto create(Long userId, PostsCreateRequestDto dto) {
@@ -116,6 +91,7 @@ public class PostsService {
 
             postsPage = postsRepository.findByCreatedAtBetween(startDate, endDate, pageable);
         }
+
         Page<PostsResponseDto> responseDto = postsPage.map(posts -> new PostsResponseDto(
                 posts.getPostId(),
                 posts.getUser().getUsername(),
@@ -124,6 +100,31 @@ public class PostsService {
                 posts.getCreatedAt(),
                 posts.getModifiedAt()
         ));
+
+        return new PostsPageResponseDto(responseDto);
+    }
+
+    @Transactional(readOnly = true)
+    public PostsPageResponseDto findPostByFollowing(Long userId) {
+
+        User findUser = userRepository.findByIdOrElseThrow(userId);
+        List<Follower> followList = followerRepository.findAllByFollower(findUser);
+
+        List<User> followingUsers = followList.stream()
+                .map(Follower::getFollowing)
+                .collect(Collectors.toList());
+
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").ascending());
+
+        Page<PostsResponseDto> responseDto = postsRepository.findByUserInOrderByCreatedAtDesc(followingUsers, pageRequest)
+                .map(posts -> new PostsResponseDto(
+                        posts.getPostId(),
+                        posts.getUser().getUsername(),
+                        posts.getTitle(),
+                        posts.getContents(),
+                        posts.getCreatedAt(),
+                        posts.getModifiedAt()
+                ));
 
         return new PostsPageResponseDto(responseDto);
     }
@@ -172,17 +173,13 @@ public class PostsService {
 
     @Transactional
     public void deleteById(Long userId, Long postId, PostsDeleteRequestDto dto) {
-        // userId로 유저 확인 후 없으면 예외 처리
         User findUser = userService.findUserByIdOrElseThrow(userId);
-        // postId로 게시물 확인 후 없으면 예외 처리
         Posts posts = findPostByIdOrElseThrow(postId);
 
-        // 찾은 유저의 비밀번호와 입력한 비밀번호가 일치하는지 확인
         if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
-            // 일치하지 않으면 예외처리
             throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
-        // 일치하면 게시물 삭제
+
         postsRepository.delete(posts);
     }
 

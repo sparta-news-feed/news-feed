@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface PostsRepository extends JpaRepository<Posts, Long> {
     Page<Posts> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-    List<Posts> findLatestPostForEachUser(List<Long> followingUserIds);
-    Posts findByPostId(Long id);
 
     Page<Posts> findByUserInOrderByCreatedAtDesc(List<User> user, Pageable pageable);
+
+    List<Posts> findAllByUser(User user);
 }
 
