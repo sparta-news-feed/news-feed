@@ -24,12 +24,10 @@ public class Comment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false) // 유저 테이블과 조인
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "posts_id", nullable = false ) //뉴스 테이블과 조인
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Posts posts;
 
     public void update(String contents) {
