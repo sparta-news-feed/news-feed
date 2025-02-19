@@ -174,9 +174,9 @@ public class PostsService {
     }
 
     @Transactional
-    public void deleteById(Long userId, Long postId, PostsDeleteRequestDto dto) {
+    public void deleteById(Long userId, PostsDeleteRequestDto dto) {
         User findUser = userService.findUserByIdOrElseThrow(userId);
-        Posts posts = findPostByIdOrElseThrow(postId);
+        Posts posts = findPostByIdOrElseThrow(dto.getPostId());
 
         if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
             throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);

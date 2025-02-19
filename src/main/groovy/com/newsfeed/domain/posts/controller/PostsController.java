@@ -71,15 +71,14 @@ public class PostsController {
         return  ResponseEntity.ok(postsService.update(userId, postId, dto));
     }
 
-    @DeleteMapping("/{postId}")
+    @PostMapping("/delete")
     public ResponseEntity<Void> delete(
             @RequestHeader(name = "Authorization") String authorization,
-            @PathVariable("postId") Long postId,
             @RequestBody PostsDeleteRequestDto dto
     ) {
         Long userId = JwtUtil.extractUserId(authorization);
 
-        postsService.deleteById(userId, postId, dto);
+        postsService.deleteById(userId, dto);
         return ResponseEntity.ok().build();
     }
 }
