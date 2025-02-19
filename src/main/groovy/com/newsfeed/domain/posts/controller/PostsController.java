@@ -47,10 +47,12 @@ public class PostsController {
 
     @GetMapping("/followers")
     public ResponseEntity<PostsPageResponseDto> findPostByFollowing(
-            @RequestHeader(name = "Authorization") String authorization
+            @RequestHeader(name = "Authorization") String authorization,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Long userId = JwtUtil.extractUserId(authorization);
-        PostsPageResponseDto response = postsService.findPostByFollowing(userId);
+        PostsPageResponseDto response = postsService.findPostByFollowing(userId, page, size);
         return ResponseEntity.ok(response);
     }
 

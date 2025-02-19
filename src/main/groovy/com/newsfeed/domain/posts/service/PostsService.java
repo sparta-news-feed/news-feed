@@ -105,7 +105,9 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public PostsPageResponseDto findPostByFollowing(Long userId) {
+    public PostsPageResponseDto findPostByFollowing(Long userId, int page, int size) {
+
+        int adjustedPage = (page > 0) ? page - 1 : 0;
 
         User findUser = userRepository.findByIdOrElseThrow(userId);
         List<Follower> followList = followerRepository.findAllByFollower(findUser);
@@ -114,9 +116,9 @@ public class PostsService {
                 .map(Follower::getFollowing)
                 .collect(Collectors.toList());
 
-        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").ascending());
+        PageRequest pageable = PageRequest.of(adjustedPage, size, Sort.by("modifiedAt").descending());
 
-        Page<PostsResponseDto> responseDto = postsRepository.findByUserInOrderByCreatedAtDesc(followingUsers, pageRequest)
+        Page<PostsResponseDto> responseDto = postsRepository.findByUserInOrderByCreatedAtDesc(followingUsers, pageable)
                 .map(posts -> new PostsResponseDto(
                         posts.getPostId(),
                         posts.getUser().getUsername(),
