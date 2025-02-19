@@ -103,7 +103,7 @@ public class UserController {
     }
 
     // 유저 회원 탈퇴
-    @DeleteMapping
+    @PostMapping("/withdraw")
     public ResponseEntity<MessageResponse> deleteUser(
             @RequestHeader(name = "Authorization") String authorization,    // 로그인한 유저 쓰려면 필수
             @RequestBody UserDeleteRequestDto requestDto
