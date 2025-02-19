@@ -48,14 +48,6 @@ public class CommentController {
         return ResponseEntity.ok(dtos);
     }
 
-//
-//    // 사용자 기준 댓글 조회 추가
-//    @GetMapping("/users/{userId}")
-//    public ResponseEntity<List<CommentResponseDto>> findCommentsByUserId(@PathVariable Long userId) {
-//        return ResponseEntity.ok(commentService.findCommentsByUserId(userId));
-//    }
-
-
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentUpdateResponseDto> update(
             @RequestHeader(name = "Authorization") String authorization,
