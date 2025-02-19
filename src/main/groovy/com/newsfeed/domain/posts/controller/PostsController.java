@@ -6,10 +6,8 @@ import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsDeleteRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsUpdateRequestDto;
 import com.newsfeed.domain.posts.dto.response.*;
-import com.newsfeed.domain.posts.entity.Posts;
 import com.newsfeed.domain.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,14 +21,7 @@ public class PostsController {
 
     private final PostsService postsService;
 
-    @GetMapping("/followers")
-    public ResponseEntity<Page<PostByFollowingResponseDto>> findPostByFollowing(
-            @RequestHeader(name = "Authorization") String authorization
-    ) {
-        Long userId = JwtUtil.extractUserId(authorization);
-        Page<PostByFollowingResponseDto> postByFollowing = postsService.findPostByFollowing(userId);
-        return ResponseEntity.ok(postByFollowing);
-    }
+
 
     @PostMapping
     public ResponseEntity<PostsCreateResponseDto> create(
@@ -54,13 +45,23 @@ public class PostsController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @GetMapping("/followers")
+    public ResponseEntity<PostsPageResponseDto> findPostByFollowing(
+            @RequestHeader(name = "Authorization") String authorization,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        Long userId = JwtUtil.extractUserId(authorization);
+        PostsPageResponseDto response = postsService.findPostByFollowing(userId, page, size);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/find/{postId}")
     public ResponseEntity<PostsResponseDto> findOne(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(postsService.findOne(postId));
     }
 
-
-    @PutMapping("/{postId}")
+    @PatchMapping("/{postId}")
     public ResponseEntity<PostsUpdateResponseDto> update(
             @RequestHeader(name = "Authorization") String authorization,
             @PathVariable("postId") Long postId,
@@ -70,15 +71,14 @@ public class PostsController {
         return  ResponseEntity.ok(postsService.update(userId, postId, dto));
     }
 
-    @DeleteMapping("/{postId}")
+    @PostMapping("/delete")
     public ResponseEntity<Void> delete(
             @RequestHeader(name = "Authorization") String authorization,
-            @PathVariable("postId") Long postId,
             @RequestBody PostsDeleteRequestDto dto
     ) {
         Long userId = JwtUtil.extractUserId(authorization);
 
-        postsService.deleteById(userId, postId, dto);
+        postsService.deleteById(userId, dto);
         return ResponseEntity.ok().build();
     }
 }

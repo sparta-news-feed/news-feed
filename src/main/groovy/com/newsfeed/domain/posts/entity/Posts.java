@@ -39,4 +39,8 @@ public class Posts extends BaseEntity {
         this.title = title;
         this.contents = contents;
     }
+
+    public void setComments(Comment comment) {
+        comments.add(comment);
+    }
 }

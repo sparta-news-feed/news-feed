@@ -1,12 +1,15 @@
 package com.newsfeed.domain.users.entity;
 
 import com.newsfeed.common.entity.BaseEntity;
+import com.newsfeed.domain.posts.entity.Posts;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor

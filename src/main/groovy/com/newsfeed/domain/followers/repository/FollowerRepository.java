@@ -25,12 +25,7 @@ public interface FollowerRepository extends JpaRepository<Follower, Long> {
   // 팔로잉 수 조회
   Long countByFollower(User follower);
 
-  // 팔로잉 찾기.
-  Optional<Follower> findFollowingByFollower (Follower following);
+  Optional<Follower> findByFollower_IdAndFollowing_Id(Long followerUserId, Long followingUserId);
 
-  default Follower findFollowingByFollowerOrElseThrow(Follower following) {
-    return findFollowingByFollower(following).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exist following = " + following));
-  }
-
-  List<Follower> findAllByFollowing(User following);
+  List<Follower> findAllByFollower(User follower);
 }

@@ -1,13 +1,13 @@
 package com.newsfeed.domain.comment.controller;
 
 import com.newsfeed.common.Const;
+import com.newsfeed.common.dto.response.MessageResponse;
 import com.newsfeed.common.utils.JwtUtil;
 import com.newsfeed.domain.comment.dto.request.CommentCreateRequestDto;
 import com.newsfeed.domain.comment.dto.request.CommentUpdateRequestDto;
 import com.newsfeed.domain.comment.dto.response.CommentResponseDto;
 import com.newsfeed.domain.comment.dto.response.CommentUpdateResponseDto;
 import com.newsfeed.domain.comment.service.CommentService;
-import com.newsfeed.domain.posts.service.PostsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +28,6 @@ public class CommentController {
             @RequestBody CommentCreateRequestDto requestDto
     ) {
         Long userId = JwtUtil.extractUserId(authorization); // 유저아이디 가져옴 :JWT 토큰에서 userId 추출
-
         return ResponseEntity.ok(commentService.createComment(userId, requestDto));
     }
 
@@ -48,7 +47,7 @@ public class CommentController {
         return ResponseEntity.ok(dtos);
     }
 
-    @PutMapping("/{commentId}")
+    @PatchMapping("/{commentId}")
     public ResponseEntity<CommentUpdateResponseDto> update(
             @RequestHeader(name = "Authorization") String authorization,
             @PathVariable("commentId") Long commentId,
@@ -59,15 +58,13 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<MessageResponse> delete(
             @RequestHeader(name = "Authorization") String authorization,
             @PathVariable("commentId") Long commentId
     ) {
         Long userId = JwtUtil.extractUserId(authorization);
         commentService.deleteComment(userId, commentId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("댓글 삭제에 성공했습니다."));
     }
-
-
 
 }

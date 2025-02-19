@@ -4,6 +4,8 @@ import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.config.PasswordEncoder;
 import com.newsfeed.domain.followers.entity.Follower;
 import com.newsfeed.domain.followers.repository.FollowerRepository;
+import com.newsfeed.domain.posts.entity.Posts;
+import com.newsfeed.domain.posts.repository.PostsRepository;
 import com.newsfeed.domain.users.dto.response.UserFollowingsProfileResponseDto;
 import com.newsfeed.domain.users.dto.response.UserProfileResponseDto;
 import com.newsfeed.domain.users.entity.User;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
   private final UserRepository userRepository;
+  private final PostsRepository postsRepository;
   private final FollowerRepository followerRepository;
   private final PasswordEncoder passwordEncoder;
 
@@ -91,6 +94,12 @@ public class UserService {
     if (!passwordEncoder.matches(password, findUser.getPassword())) {
       throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
     }
+
+    // post 삭제
+    // 1. postRepository userId에 맞는 List<posts>
+    // 2. for문 돌리면서 싹다 delete 돌리면 될듯??
+    List<Posts> postsList = postsRepository.findAllByUser(findUser);
+    postsRepository.deleteAll(postsList);
 
     findUser.deleteUser();
   }
