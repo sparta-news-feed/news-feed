@@ -2,6 +2,7 @@ package com.newsfeed.domain.users.controller;
 
 import com.newsfeed.common.Const;
 import com.newsfeed.common.dto.response.MessageResponse;
+import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.common.utils.JwtUtil;
 import com.newsfeed.domain.users.dto.request.UserDeleteRequestDto;
 import com.newsfeed.domain.users.dto.request.UserLoginRequestDto;
@@ -39,7 +40,18 @@ public class UserController {
 
     // 유저 로그인
     @PostMapping("/login")
-    public ResponseEntity<MessageResponse> login(@Valid @RequestBody UserLoginRequestDto requestDto) {
+    public ResponseEntity<MessageResponse> login(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @Valid @RequestBody UserLoginRequestDto requestDto
+    ) {
+        if (authorization != null) {
+            if (JwtUtil.validateExpired(authorization)) {
+                throw new ApplicationException("이미 만료된 토큰입니다. 로그인을 다시 시도해주세요", HttpStatus.UNAUTHORIZED);
+            }
+
+            throw new ApplicationException("이미 로그인된 유저입니다.", HttpStatus.BAD_REQUEST);
+        }
+
         UserProfileResponseDto response = userService.login(requestDto.getEmail(), requestDto.getPassword());
 
         HttpHeaders httpHeaders = new HttpHeaders();
