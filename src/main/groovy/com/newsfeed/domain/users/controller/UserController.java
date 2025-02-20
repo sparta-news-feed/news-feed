@@ -83,13 +83,18 @@ public class UserController {
 
     // 유저 비밀번호 수정
     @PatchMapping
-    public ResponseEntity<Void> updatePassword(
+    public ResponseEntity<MessageResponse> updatePassword(
             @RequestHeader(name = "Authorization") String authorization,
             @Valid @RequestBody UserPasswordUpdateRequestDto requestDto
     ) {
         Long userId = JwtUtil.extractUserId(authorization);
         userService.updatePassword(userId, requestDto.getOldPassword(), requestDto.getNewPassword());
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        // 비밀번호 수정시에 토큰 만료시켜서 재로그인 유도
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + JwtUtil.invalidateToken(userId));
+
+        return ResponseEntity.ok(new MessageResponse("비밀번호 변경에 성공했습니다."));
     }
 
     //팔로잉 목록 조회

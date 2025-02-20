@@ -1,6 +1,7 @@
 package com.newsfeed.domain.posts.controller;
 
 import com.newsfeed.common.Const;
+import com.newsfeed.common.dto.response.MessageResponse;
 import com.newsfeed.common.utils.JwtUtil;
 import com.newsfeed.domain.posts.dto.request.PostsCreateRequestDto;
 import com.newsfeed.domain.posts.dto.request.PostsDeleteRequestDto;
@@ -72,13 +73,13 @@ public class PostsController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<MessageResponse> delete(
             @RequestHeader(name = "Authorization") String authorization,
             @RequestBody PostsDeleteRequestDto dto
     ) {
         Long userId = JwtUtil.extractUserId(authorization);
 
         postsService.deleteById(userId, dto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("게시물 삭제에 성공했습니다."));
     }
 }
