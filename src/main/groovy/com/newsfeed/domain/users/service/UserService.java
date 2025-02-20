@@ -40,6 +40,10 @@ public class UserService {
   // 유저 로그인
   public UserProfileResponseDto login(String email, String password) {
     User findUser = findByEmailOrElseThrow(email);
+    if (findUser.getDeletedAt() != null) {
+      throw new ApplicationException("회원 탈퇴한 유저입니다.", HttpStatus.NOT_FOUND);
+    }
+
     if (!passwordEncoder.matches(password, findUser.getPassword())) {
       throw new ApplicationException("비밀번호가 일치하지 않습니다", HttpStatus.UNAUTHORIZED);
     }
