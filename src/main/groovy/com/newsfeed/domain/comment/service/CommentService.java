@@ -1,5 +1,6 @@
 package com.newsfeed.domain.comment.service;
 
+import com.newsfeed.common.exception.ApplicationException;
 import com.newsfeed.domain.comment.dto.request.CommentCreateRequestDto;
 import com.newsfeed.domain.comment.dto.request.CommentUpdateRequestDto;
 import com.newsfeed.domain.comment.dto.response.CommentResponseDto;
@@ -12,6 +13,7 @@ import com.newsfeed.domain.users.entity.User;
 import com.newsfeed.domain.users.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,8 +104,8 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글을 찾을 수 없습니다."));
 
-        if (comment.getUser() == null || !comment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("댓글을 수정할 권한이 없습니다.");
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new ApplicationException("댓글을 수정할 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
 
         comment.update(
@@ -127,8 +129,8 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글을 찾을 수 없습니다."));
 
-        if (comment.getUser() == null || !comment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("댓글을 삭제할 권한이 없습니다.");
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new ApplicationException("댓글을 삭제할 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
 
         commentRepository.delete(comment);
