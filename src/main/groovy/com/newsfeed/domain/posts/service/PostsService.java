@@ -157,6 +157,11 @@ public class PostsService {
             // 일치하지 않으면 예외처리
             throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
+
+        if (!posts.getUser().getId().equals(userId)) {
+            throw new ApplicationException("자신이 작성한 게시물만 수정이 가능합니다.", HttpStatus.FORBIDDEN);
+        }
+
         // 일치하면 게시물 수정
         posts.update(
                 dto.getTitle(),
@@ -180,6 +185,10 @@ public class PostsService {
 
         if (!passwordEncoder.matches(dto.getPassword(), findUser.getPassword())) {
             throw new ApplicationException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!posts.getUser().getId().equals(userId)) {
+            throw new ApplicationException("자신이 작성한 게시물만 삭제가 가능합니다.", HttpStatus.FORBIDDEN);
         }
 
         postsRepository.delete(posts);
