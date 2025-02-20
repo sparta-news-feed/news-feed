@@ -41,7 +41,7 @@ public class UserController {
     // 유저 로그인
     @PostMapping("/login")
     public ResponseEntity<MessageResponse> login(
-            @RequestHeader(name = "Authorization") String authorization,
+            @RequestHeader(name = "Authorization", required = false) String authorization,
             @Valid @RequestBody UserLoginRequestDto requestDto
     ) {
         if (authorization != null) {
