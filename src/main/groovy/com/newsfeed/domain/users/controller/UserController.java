@@ -94,7 +94,7 @@ public class UserController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(HttpHeaders.AUTHORIZATION, "Bearer " + JwtUtil.invalidateToken(userId));
 
-        return ResponseEntity.ok(new MessageResponse("비밀번호 변경에 성공했습니다."));
+        return new ResponseEntity<>(new MessageResponse("비밀번호 변경에 성공했습니다."), httpHeaders, HttpStatus.OK);
     }
 
     //팔로잉 목록 조회
